@@ -79,7 +79,16 @@ WSGI_APPLICATION = 'gs.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',    
+    },
+    'onixPos':{
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'integracoes',                      
+            'USER': 'douglas',
+            'PASSWORD': '297hKUXjQhclHMQf',
+            'HOST': '10.21.1.67',
+            'PORT': '5432',
+            'TIME_ZONE': 'America/Sao_Paulo'
     }
 }
 

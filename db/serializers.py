@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from db.models import Vehicle, Client
-from collections import OrderedDict
+
+from db.models import Vehicle, Client, Onixsat
 
 
 class VehicleSerializer(serializers.Serializer):
@@ -21,7 +21,6 @@ class VehicleSerializer(serializers.Serializer):
         instance.client = validated_data.get('client', instance.client)
         instance.save()        
         return instance
-
 
 class ClientSerializer(serializers.Serializer):
     pk = serializers.IntegerField(read_only=True)
@@ -46,3 +45,9 @@ class ClientSerializer(serializers.Serializer):
         instance.cnpj = validate_data.get('cnpj', instance.cnpj)
         instance.save()    
         return instance
+
+class OnixsatSerializer(serializers.ModelSerializer):
+    """"""
+    class Meta:
+        model = Onixsat
+        fields = '__all__'

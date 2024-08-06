@@ -1,11 +1,15 @@
 from django.shortcuts import render
 from rest_framework import status
-from django.http import HttpResponse, JsonResponse
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import JSONParser
 from django.db import connection
-from db.models import Vehicle, Client
-from db.serializers import VehicleSerializer, ClientSerializer
+from db.models import Vehicle, Client, Onixsat
+from db.serializers import *
+from shapely.geometry import Polygon
 
 # Create your views here.
 
@@ -76,6 +80,14 @@ def vehicle_detail(request, pk):
                 serializer.save()
                 return JsonResponse(serializer.data)
             return JsonResponse(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def onix_test(pk: int):
+    onix_vehicles = OnixsatSerializer(
+        Onixsat.objects.using('onixPos').get(pk=pk)) 
+    return Response(
+        onix_vehicles.data, status=status.HTTP_200_OK)
 
 @csrf_exempt
 def clear_db(request):
