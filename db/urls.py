@@ -2,7 +2,8 @@ from django.urls import path
 from db import views
 
 urlpatterns = {
-    path('clear/', views.clear_db),
+    path("clear/", views.clear_db),
+    path("test/", views.test),
     path("clients/", views.clients_list),
     path("onix/<int:pk>/", views.onix_test),
     path("clients/<int:pk>/", views.client_detail),

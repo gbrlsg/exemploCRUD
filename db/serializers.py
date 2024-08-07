@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from db.models import Vehicle, Client, Onixsat
-
+from db.models import *
 
 class VehicleSerializer(serializers.Serializer):
     pk = serializers.IntegerField(read_only=True)
@@ -22,20 +21,32 @@ class VehicleSerializer(serializers.Serializer):
         instance.save()        
         return instance
 
+class AreaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Area
+        fields = '__all__'
+
 class ClientSerializer(serializers.Serializer):
     pk = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=150)
     cnpj = serializers.CharField(max_length=14)
     fleetSize = serializers.SerializerMethodField()
     fleet = serializers.SerializerMethodField()
-    creationDate = serializers.DateTimeField(read_only=True,format='%d/%m/%y %H:%M')
-    lastModified = serializers.DateTimeField(read_only=True,format='%d/%m/%y %H:%M')
+    areas = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(
+        read_only=True,format='%d/%m/%y %H:%M')
+    modified_at = serializers.DateTimeField(
+        read_only=True,format='%d/%m/%y %H:%M')
 
     def get_fleetSize(self, obj):
         return len(obj.vehicle_set.all())
 
-    def get_fleet(self, obj):
+    def get_fleet(self, obj: Client):
         return VehicleSerializer(obj.vehicle_set.all(), many=True).data 
+
+    def get_areas(self, obj: Client):
+        return AreaSerializer(obj.area_set.all(), many=True).data 
 
     def create(self, validated_data):
         return Client.objects.create(**validated_data)
