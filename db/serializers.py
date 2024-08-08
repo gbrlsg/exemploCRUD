@@ -28,6 +28,7 @@ class AreaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ClientSerializer(serializers.Serializer):
+    
     pk = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=150)
     cnpj = serializers.CharField(max_length=14)
@@ -35,9 +36,9 @@ class ClientSerializer(serializers.Serializer):
     fleet = serializers.SerializerMethodField()
     areas = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(
-        read_only=True,format='%d/%m/%y %H:%M')
+        read_only=True, format='%d/%m/%y %H:%M')
     modified_at = serializers.DateTimeField(
-        read_only=True,format='%d/%m/%y %H:%M')
+        read_only=True, format='%d/%m/%y %H:%M')
 
     def get_fleetSize(self, obj):
         return len(obj.vehicle_set.all())

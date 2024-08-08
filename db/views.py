@@ -118,19 +118,16 @@ def test(request: Request):
     n_of_test_clients = randint(3,10)
     for n in range(1,n_of_test_clients+1):
         client = Client(
-                name = f'Cliente Teste {n}',
-                cnpj = gen_mock_cnpj([clnt.cnpj for clnt in test_clients])
+                name=f"Cliente Teste {n}",
+                cnpj = gen_mock_cnpj([cl.cnpj for cl in test_clients]),
             )
         client.save()
         n_of_test_areas = randint(1,3)
-        for n in range(1,n_of_test_areas+1):
-            area_perimeter = gen_square_area(5.0)
-            area = Area(
-                name = f'{client.name}/ Area teste {n}',
-                client=client,
-                perimeter= ' '.join([str(point) for point in area_perimeter])
+        for n in range(1, n_of_test_areas+1):
+            client.associated_areas.create(
+                name = f"Cerca Teste {n}",
+                perimeter = ' '.join([str(pt) for pt in gen_square_area(5)]) 
             )
-            area.save()
-        test_clients.append(client) 
-    serialized_clients = ClientSerializer(test_clients, many=True)
-    return Response(serialized_clients.data, status=status.HTTP_200_OK)
+        print(client.area_structure())
+
+    return Response(status=status.HTTP_200_OK)

@@ -1,42 +1,10 @@
+from typing import List
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+
 # Create your models here.
-
-class Client(models.Model):
-
-    name = models.CharField(max_length=150)
-    cnpj = models.CharField(max_length=14)
-    created_at =  models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self): return self.name
-
-class Area(models.Model):
-    
-    name = models.CharField(max_length=150)
-    perimeter = models.CharField(max_length=100)
-    client = models.ForeignKey(Client,models.DO_NOTHING)
-
-class Vehicle(models.Model):
-    class VehicleType(models.TextChoices):
-        UTILITY = "UTL", _("Utilitário")
-        LIGHT_DUTY_TRUCK = "LDT", _("VUC")
-        SINGLE_UNITY_TRUCK = "SUT", _("Toco")
-        TRUCK = "TRK", _("Truck")
-        TWIN_STEER_TRUCK = "TST", _("Bitruck")
-        TRACTOR = "TCR", _("Cavalo mecânico simples")
-        SEMITRAILER = "STR", _("Carreta")
-
-    area = models.ForeignKey(Area,models.DO_NOTHING,blank=True,null=True)
-    client = models.ForeignKey(Client,models.DO_NOTHING,blank=True,null=True)
-    plate = models.CharField(max_length=7)
-    serialNumber = models.CharField(max_length=10)
-    vehicleType = models.CharField(max_length=3,choices=VehicleType)
-    creationDate =  models.DateTimeField(auto_now_add=True)
-    lastModified = models.DateTimeField(auto_now=True)
-
-    def __str__(self): return self.plate
 
 class Onixsat(models.Model):
     mid = models.BigIntegerField(blank=True, null=True)
@@ -73,3 +41,61 @@ class Onixsat(models.Model):
         managed = False
         db_table = 'onixsat'
         app_label =  'db'
+
+class MockPosition(models.Model):
+    veiid = models.CharField(max_length=11, blank=True, null=True)
+    lat = models.CharField(max_length=30, blank=True, null=True)
+    lon = models.CharField(max_length=30, blank=True, null=True)
+
+class Vehicle(models.Model):
+    class VehicleType(models.TextChoices):
+        UTILITY = "UTL", _("Utilitário")
+        LIGHT_DUTY_TRUCK = "LDT", _("VUC")
+        SINGLE_UNITY_TRUCK = "SUT", _("Toco")
+        TRUCK = "TRK", _("Truck")
+        TWIN_STEER_TRUCK = "TST", _("Bitruck")
+        TRACTOR = "TCR", _("Cavalo mecânico simples")
+        SEMITRAILER = "STR", _("Carreta")
+
+    client = models.ForeignKey('Client',null=True,on_delete=models.SET_NULL)
+    position = models.ForeignKey('MockPosition',null=True,on_delete=models.SET_NULL)
+    plate = models.CharField(max_length=7)
+    serialNumber = models.CharField(max_length=10)
+    vehicleType = models.CharField(max_length=3,choices=VehicleType)
+    creationDate =  models.DateTimeField(auto_now_add=True)
+    lastModified = models.DateTimeField(auto_now=True)
+
+    def __str__(self): return self.plate
+
+class Area(models.Model):
+    
+    name = models.CharField(max_length=150)
+    perimeter = models.CharField(max_length=100)
+    vehicles_within = models.ManyToManyField('Vehicle')
+
+    def __str__(self) -> str:
+        return f"Name:{self.name}\n{self.perimeter}"
+
+class Client(models.Model):
+
+    name = models.CharField(max_length=150)
+    cnpj = models.CharField(max_length=14)
+    associated_areas = models.ManyToManyField('Area') 
+    created_at =  models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return ("{}\n"*4).format(
+            f"Name: {self.name}",
+            f"CNPJ: {self.cnpj}",
+            f"Creation: {self.created_at}",    
+            f"Modification: {self.modified_at}",
+        )
+
+    def area_structure(self) -> str:
+        struct_for_print: List[str] = [f"{self.name} (Client):"]
+
+        for area in self.associated_areas.all():
+            struct_for_print.append(f" {area.name} (Area):")
+        
+        return '\n'.join(struct_for_print)
